@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="10 seconds" debug="true">
+    <!--======================= readme ====================== 1.don't not use
+        console appender in product or int-test env,so don't add any consoleappender
+        at this file 2.you should config two system properties LOG_HOME: the root
+        directory where the log is placed,default value is . LOG_APPEND: append the
+        log to file ,default is true,in ebao tomcat it will be set to false LOG_DEFAULT_LEVEL:
+        the default root log level,default value is INFO LOG_CLEAN_HISTORY_ON_START:
+        clean the history file when app start,default value is true 3.logback will
+        search the config via order: logback.groovy, logback-test.xml logback.xml
+        so if you want to customize,pls put a logback-test.xml on the classpath.
+        4. don't add loggers if it more detail then default level,we already add
+        add the restful api to change the logger and level see com.ebao.unicorn.platform.foundation.restful.LoggerMgmtResource
+        for more info pls ask shawn.yang if you want to change this file thanks! -->
+    <property name="VAR_LOG_DEFAULT_LEVEL" value="${LOG_DEFAULT_LEVEL:-INFO}" />
+
+    <!-- 开启哪些appender -->
+    <property name="VAR_CONSOLE_ENABLED" value="${LOG_CONSOLE_ENABLED:-true}" />
+
+    <property name="VAR_LOG_PATTERN"
+              value="[%d{yyyy-MM-dd HH:mm:ss.SSS Z}] %5p %t %logger %L :%m%n%xEx" />
+
+    <root>
+        <level value="${VAR_LOG_DEFAULT_LEVEL}" />
+    </root>
+    <!-- 条件激活 console log -->
+    <if condition='property("VAR_CONSOLE_ENABLED").contains("true")'>
+        <then>
+            <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+                <encoder>
+                    <pattern>${VAR_LOG_PATTERN}</pattern>
+                    <charset>UTF-8</charset>
+                </encoder>
+            </appender>
+            <root>
+                <appender-ref ref="CONSOLE" />
+            </root>
+        </then>
+    </if>
+
+    <!-- see http://stackoverflow.com/questions/2656565/classcircularityerror-when-running-tomcat-6-from-eclipse -->
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <!-- reset all previous level configurations of all j.u.l. loggers -->
+        <resetJUL>true</resetJUL>
+    </contextListener>
+</configuration>
